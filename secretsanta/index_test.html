@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secret Santa 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #071407;
+      --panel-bg:  #120606;
+      --red:       #9b0000;
+      --red-bright:#cc1111;
+      --gold:      #ffd700;
+      --gold-dim:  #b8900a;
+      --cream:     #fff5d0;
+      --muted:     #9a8a6a;
+    }
+
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background-color: var(--bg);
+      /* Fair Isle sweater crosshatch */
+      background-image:
+        repeating-linear-gradient(45deg,  transparent 0, transparent 5px, rgba(255,255,255,.025) 5px, rgba(255,255,255,.025) 6px),
+        repeating-linear-gradient(-45deg, transparent 0, transparent 5px, rgba(255,255,255,.018) 5px, rgba(255,255,255,.018) 6px);
+      color: var(--cream);
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
+
+    /* ── LIGHTS ─────────────────────────────────────────────────────────────── */
+
+    .lights-wrap {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      background: #0a0a0a;
+      padding: 0 0 6px;
+      border-bottom: 2px solid #222;
+    }
+
+    .wire {
+      height: 3px;
+      background: #555;
+      margin: 0;
+    }
+
+    .lights-row {
+      display: flex;
+      justify-content: space-around;
+      padding: 0 8px;
+      margin-top: -1px;
+    }
+
+    .light {
+      width: 13px;
+      height: 20px;
+      border-radius: 3px 3px 7px 7px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .light::before {
+      content: '';
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 6px;
+      height: 7px;
+      background: #666;
+      border-radius: 2px 2px 0 0;
+    }
+
+    .light:nth-child(4n+1) { background: #ff2020; animation: gl-r 1.5s ease-in-out infinite alternate; }
+    .light:nth-child(4n+2) { background: #f5d020; animation: gl-y 1.5s ease-in-out infinite alternate .38s; }
+    .light:nth-child(4n+3) { background: #20cc20; animation: gl-g 1.5s ease-in-out infinite alternate .76s; }
+    .light:nth-child(4n+0) { background: #2080ff; animation: gl-b 1.5s ease-in-out infinite alternate 1.14s; }
+
+    @keyframes gl-r { from { opacity:1; box-shadow: 0 0 10px 4px #ff4040; } to { opacity:.15; box-shadow:none; } }
+    @keyframes gl-y { from { opacity:1; box-shadow: 0 0 10px 4px #f5d040; } to { opacity:.15; box-shadow:none; } }
+    @keyframes gl-g { from { opacity:1; box-shadow: 0 0 10px 4px #40ff40; } to { opacity:.15; box-shadow:none; } }
+    @keyframes gl-b { from { opacity:1; box-shadow: 0 0 10px 4px #40a0ff; } to { opacity:.15; box-shadow:none; } }
+
+    /* ── SNOW ───────────────────────────────────────────────────────────────── */
+
+    #snow {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ── MARQUEE STRIP ──────────────────────────────────────────────────────── */
+
+    .marquee-wrap {
+      background: var(--red);
+      border-bottom: 2px solid var(--gold-dim);
+      overflow: hidden;
+      white-space: nowrap;
+      padding: 4px 0;
+      margin-top: 35px; /* clear the lights */
+    }
+
+    .marquee-inner {
+      display: inline-block;
+      animation: scroll-left 28s linear infinite;
+      font-family: 'Mountains of Christmas', cursive;
+      font-size: 1rem;
+      color: var(--gold);
+      letter-spacing: 3px;
+    }
+
+    @keyframes scroll-left {
+      from { transform: translateX(100vw); }
+      to   { transform: translateX(-100%); }
+    }
+
+    /* ── MAIN ───────────────────────────────────────────────────────────────── */
+
+    .main {
+      position: relative;
+      z-index: 2;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    /* ── TITLE ──────────────────────────────────────────────────────────────── */
+
+    .site-title {
+      font-family: 'Mountains of Christmas', cursive;
+      font-weight: 700;
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.15em;
+      line-height: 1.05;
+      padding: 28px 0 6px;
+      letter-spacing: 2px;
+      text-shadow:
+        0 0 12px #ff4400,
+        0 0 28px #ff2200,
+        3px 3px 0 #6b0000;
+    }
+
+    .title-santa {
+      height: 1em;
+      width: auto;
+      mix-blend-mode: screen;
+      vertical-align: middle;
+    }
+
+    .site-year {
+      text-align: center;
+      font-family: 'Mountains of Christmas', cursive;
+      font-size: 1.3rem;
+      color: var(--red-bright);
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+
+    /* ── PANEL ──────────────────────────────────────────────────────────────── */
+
+    .panel {
+      background: var(--panel-bg);
+      /* layered border: gold outer, gap, red inner */
+      box-shadow:
+        0 0 0 2px var(--gold-dim),
+        0 0 0 5px var(--panel-bg),
+        0 0 0 8px var(--red),
+        0 12px 40px rgba(0,0,0,.8);
+      border-radius: 2px;
+      padding: 28px 28px 24px;
+      margin-bottom: 32px;
+      position: relative;
+    }
+
+    /* corner ornaments */
+    .panel::before { content: '✦'; position: absolute; top:  6px; left:  10px; color: var(--gold-dim); font-size: 1.2rem; }
+    .panel::after  { content: '✦'; position: absolute; top:  6px; right: 10px; color: var(--gold-dim); font-size: 1.2rem; }
+
+    .panel-title {
+      font-family: 'Mountains of Christmas', cursive;
+      font-size: 1.9rem;
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: 22px;
+      letter-spacing: 1px;
+      text-shadow: 0 0 10px rgba(255,215,0,.35);
+    }
+
+    /* ── REVEAL FORM ────────────────────────────────────────────────────────── */
+
+    .form-row {
+      display: flex;
+      gap: 14px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 22px;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-field label {
+      font-family: 'Mountains of Christmas', cursive;
+      font-size: 1rem;
+      color: var(--gold);
+      letter-spacing: 1px;
+    }
+
+    select, input[type="text"] {
+      background: #0c0c0c;
+      border: 2px solid var(--red);
+      border-radius: 2px;
+      color: var(--cream);
+      font-family: Georgia, serif;
+      font-size: 1.05rem;
+      padding: 8px 12px;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      min-width: 155px;
+    }
+
+    select:focus, input[type="text"]:focus {
+      border-color: var(--gold-dim);
+      box-shadow: 0 0 8px rgba(255,215,0,.25);
+    }
+
+    input[type="text"]::placeholder { color: #555; font-style: italic; }
+
+    /* ── WAX SEAL ───────────────────────────────────────────────────────────── */
+
+    .wax-seal {
+      width: 84px;
+      height: 84px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 38% 33%, #dd2222, #7a0000 70%);
+      border: 3px solid var(--gold);
+      color: var(--gold);
+      font-family: 'Mountains of Christmas', cursive;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow:
+        0 4px 16px rgba(0,0,0,.7),
+        inset 0 1px 3px rgba(255,255,255,.15),
+        0 0 0 5px rgba(120,0,0,.3);
+      transition: transform .15s, box-shadow .15s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      line-height: 1.25;
+    }
+
+    .wax-seal:hover {
+      transform: scale(1.06);
+      box-shadow:
+        0 6px 22px rgba(0,0,0,.8),
+        inset 0 1px 3px rgba(255,255,255,.2),
+        0 0 18px rgba(255,215,0,.3),
+        0 0 0 5px rgba(120,0,0,.35);
+    }
+
+    .wax-seal:active    { transform: scale(.96); }
+    .wax-seal:disabled  { opacity: .45; cursor: default; transform: none !important; }
+
+    /* ── DIVIDER ────────────────────────────────────────────────────────────── */
+
+    .xmas-divider {
+      text-align: center;
+      color: var(--red);
+      letter-spacing: 10px;
+      margin: 6px 0 16px;
+      font-size: 1.1rem;
+      user-select: none;
+    }
+
+    /* ── RESULT ─────────────────────────────────────────────────────────────── */
+
+    .result-box {
+      text-align: center;
+      padding: 22px 16px;
+      border: 2px solid var(--gold-dim);
+      border-radius: 2px;
+      background: rgba(0,0,0,.45);
+      animation: pop-in .45s cubic-bezier(.175,.885,.32,1.275);
+    }
+
+    @keyframes pop-in {
+      from { transform: scale(.65); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+
+    .result-label {
+      font-family: 'Mountains of Christmas', cursive;
+      font-size: 1.1rem;
+      color: #cc9900;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .result-name {
+      font-family: 'Mountains of Christmas', cursive;
+      font-size: clamp(2.5rem, 9vw, 4rem);
+      font-weight: 700;
+      color: var(--gold);
+      text-shadow: 0 0 18px rgba(255,215,0,.55), 2px 2px 0 #6b3500;
+      margin-top: 4px;
+      line-height: 1.1;
+    }
+
+    .result-deck {
+      font-size: 2rem;
+      margin-top: 10px;
+      letter-spacing: 6px;
+    }
+
+    .error-msg {
+      text-align: center;
+      color: #ff5555;
+      font-style: italic;
+      font-size: 1.05rem;
+      padding: 10px 0 0;
+    }
+
+    .hidden { display: none !important; }
+
+    /* ── MATH TABLE ─────────────────────────────────────────────────────────── */
+
+    .math-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 1rem;
+      margin-bottom: 22px;
+      border: 2px solid var(--red);
+    }
+
+    .math-table th {
+      background: var(--red);
+      color: var(--gold);
+      font-family: 'Mountains of Christmas', cursive;
+      font-size: 1.05rem;
+      padding: 10px 14px;
+      text-align: left;
+      letter-spacing: 1px;
+    }
+
+    .math-table td {
+      padding: 9px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+
+    .math-table tr:nth-child(odd)  td { background: rgba(255,255,255,.03); }
+    .math-table tr:nth-child(even) td { background: rgba(0,0,0,.2); }
+    .math-table tr:last-child td { color: var(--gold); font-weight: 600; border-bottom: none; }
+
+    .math-table .num {
+      text-align: right;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #ffaa44;
+      white-space: nowrap;
+      min-width: 120px;
+    }
+
+    .math-table tr:last-child .num { color: var(--gold); }
+
+    /* ── FACT CARD ──────────────────────────────────────────────────────────── */
+
+    .fact-card {
+      border: 2px solid rgba(184,144,10,.4);
+      border-radius: 2px;
+      background: rgba(0,0,0,.3);
+      padding: 20px 20px 16px;
+    }
+
+    .fact-text {
+      font-size: 1.1rem;
+      line-height: 1.7;
+      color: var(--cream);
+      min-height: 90px;
+    }
+
+    .fact-text em {
+      color: var(--gold);
+      font-style: normal;
+      font-weight: bold;
+    }
+
+    .fact-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+    }
+
+    .fact-counter {
+      font-family: 'Mountains of Christmas', cursive;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .next-btn {
+      background: var(--red);
+      border: 2px solid var(--gold-dim);
+      color: var(--gold);
+      font-family: 'Mountains of Christmas', cursive;
+      font-size: 1rem;
+      padding: 8px 18px;
+      cursor: pointer;
+      border-radius: 2px;
+      letter-spacing: 1px;
+      transition: background .15s, transform .1s;
+    }
+
+    .next-btn:hover { background: var(--red-bright); transform: translateX(2px); }
+
+    /* ── FOOTER ─────────────────────────────────────────────────────────────── */
+
+    footer {
+      text-align: center;
+      padding: 32px 16px 16px;
+      font-family: 'Mountains of Christmas', cursive;
+      color: #3a4a3a;
+      font-size: .95rem;
+      letter-spacing: 2px;
+      position: relative;
+      z-index: 2;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- LIGHTS -->
+  <div class="lights-wrap">
+    <div class="wire"></div>
+    <div class="lights-row" id="lights"></div>
+  </div>
+
+  <!-- SNOW -->
+  <canvas id="snow"></canvas>
+
+  <!-- MARQUEE -->
+  <div class="marquee-wrap">
+    <div class="marquee-inner">
+      🎅&nbsp; HO HO HO! &nbsp;🎄&nbsp; MERRY CHRISTMAS! &nbsp;☃️&nbsp; HAPPY HOLIDAYS! &nbsp;🎁&nbsp; SEASON'S GREETINGS! &nbsp;⭐&nbsp; HO HO HO! &nbsp;🎄&nbsp; MERRY CHRISTMAS! &nbsp;☃️&nbsp; HAPPY HOLIDAYS! &nbsp;🎁&nbsp; SEASON'S GREETINGS! &nbsp;⭐&nbsp;
+    </div>
+  </div>
+
+  <div class="main">
+
+    <h1 class="site-title">Secret Santa <img src="santa-face.png" class="title-santa" alt=""></h1>
+    <p class="site-year">~ 2026 ~</p>
+
+    <!-- REVEAL -->
+    <div class="panel">
+      <h2 class="panel-title">✨ Who's Your Person? ✨</h2>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label for="nameSelect">Your Name</label>
+          <select id="nameSelect">
+            <option value="">— select —</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="codeInput">Your Code</label>
+          <input type="text" id="codeInput" placeholder="e.g. ABC12345"
+                 maxlength="10" autocomplete="off" autocorrect="off" spellcheck="false">
+        </div>
+        <button class="wax-seal" id="revealBtn">Reveal</button>
+      </div>
+
+      <div class="xmas-divider">❄ ❄ ❄</div>
+
+      <div id="resultBox" class="hidden"></div>
+      <p  id="errorMsg"  class="error-msg hidden"></p>
+    </div><!-- /reveal panel -->
+
+    <!-- MATH -->
+    <div class="panel">
+      <h2 class="panel-title">🔢 The Math Behind the Magic 🔢</h2>
+
+      <table class="math-table">
+        <thead>
+          <tr>
+            <th>Condition</th>
+            <th class="num">Valid Assignments</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>No rules at all</td>                  <td class="num">40,320</td></tr>
+          <tr><td>No giving to yourself</td>             <td class="num">14,833</td></tr>
+          <tr><td>+ No giving to your partner</td>       <td class="num">4,752</td></tr>
+          <tr><td>+ No repeats from last year</td>       <td class="num">1,257 &larr; yours</td></tr>
+        </tbody>
+      </table>
+
+      <div class="fact-card">
+        <div class="fact-text" id="factText"></div>
+        <div class="fact-footer">
+          <span class="fact-counter" id="factCounter"></span>
+          <button class="next-btn" id="nextFact">Next Fact &rarr;</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+
+  <footer>Ho Ho Ho &nbsp;·&nbsp; Secret Santa 2026 &nbsp;·&nbsp; 🎄 &nbsp;·&nbsp; You are visitor #1,257</footer>
+
+  <script>
+    // Embedded by generate.py — run it to populate this
+    const RECORDS = [{"name": "Jim", "salt": "cUJ30OKG9ICqlWRUTYnpOg==", "iv": "J8hggwhnFB1xA9Fq", "ciphertext": "kdmduHD8TcFycijBf2SDlOOVIrM="}, {"name": "Pam", "salt": "a4im2P3D1ihknRmcs2zZTg==", "iv": "D7YUNfWGurqILS1K", "ciphertext": "q10+UL3jnkj/37oKnVWjjvFscegG"}, {"name": "Peter", "salt": "qFHvLx49qAsyWTclq4B4Ig==", "iv": "A/l7iNsXJ1J/fqfi", "ciphertext": "64HBvk0IxT9Dwg8DX1HuHNgboA=="}, {"name": "Lois", "salt": "dzkNtU+Gyq7aG6+j8Vfqog==", "iv": "yk3BdcMsAtpevTDu", "ciphertext": "AZ59A8+EvThS57aoboQzvH0j+v+H"}, {"name": "Mickey", "salt": "qo+F4e7BcMz78JwvXq6hWQ==", "iv": "Z0HSSA6Go8/UOmwn", "ciphertext": "CsXzKeEnUJIjytKZdlMVnU0X13a0lw=="}, {"name": "Minnie", "salt": "AhZpoaFDKkZRsK7zigciug==", "iv": "UuY51LY0sJzP3ycE", "ciphertext": "JHdhji38ZAZOSVFwF2D/BNpQSw=="}, {"name": "Donald", "salt": "hJcdkZIRUmpJ65dWimiJeg==", "iv": "1Pd5mfFoVU8VnkBF", "ciphertext": "IR37+kZ+Ip9caFjgFVsvVp0pqjIJzA=="}, {"name": "Daisy", "salt": "jpx57QbeGDi4LyuGLEuZPw==", "iv": "rdGuSNxOox/uw8BX", "ciphertext": "Oe6MVnGn6tgDx9yVOxc/HeSRbx45fw=="}];
+
+    // ── Populate name dropdown from records ───────────────────────────────────
+    const nameSelect = document.getElementById('nameSelect');
+    RECORDS.forEach(r => {
+      const opt = document.createElement('option');
+      opt.value = opt.textContent = r.name;
+      nameSelect.appendChild(opt);
+    });
+
+    // ── Lights ────────────────────────────────────────────────────────────────
+    const lightsRow = document.getElementById('lights');
+    for (let i = 0; i < 44; i++) {
+      const l = document.createElement('div');
+      l.className = 'light';
+      lightsRow.appendChild(l);
+    }
+
+    // ── Snow ──────────────────────────────────────────────────────────────────
+    const canvas = document.getElementById('snow');
+    const ctx    = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    const flakes = Array.from({ length: 90 }, () => ({
+      x:       Math.random() * window.innerWidth,
+      y:       Math.random() * window.innerHeight,
+      r:       Math.random() * 2.5 + 0.5,
+      speed:   Math.random() * 0.7 + 0.25,
+      drift:   (Math.random() - 0.5) * 0.35,
+      opacity: Math.random() * 0.45 + 0.25,
+    }));
+
+    (function drawSnow() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      flakes.forEach(f => {
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${f.opacity})`;
+        ctx.fill();
+        f.y += f.speed;
+        f.x += f.drift;
+        if (f.y > canvas.height + 5) { f.y = -5; f.x = Math.random() * canvas.width; }
+        if (f.x > canvas.width)  f.x = 0;
+        if (f.x < 0)             f.x = canvas.width;
+      });
+      requestAnimationFrame(drawSnow);
+    })();
+
+    // ── Crypto helpers ────────────────────────────────────────────────────────
+    function b64ToBytes(b64) {
+      const bin = atob(b64);
+      const out = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+      return out;
+    }
+
+    async function decryptGiftee(name, code) {
+      const record = RECORDS.find(r => r.name === name);
+      if (!record) throw new Error('Name not found');
+
+      const keyMaterial = await crypto.subtle.importKey(
+        'raw',
+        new TextEncoder().encode(code.trim().toUpperCase()),
+        'PBKDF2',
+        false,
+        ['deriveKey']
+      );
+
+      const key = await crypto.subtle.deriveKey(
+        { name: 'PBKDF2', salt: b64ToBytes(record.salt), iterations: 100_000, hash: 'SHA-256' },
+        keyMaterial,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['decrypt']
+      );
+
+      const decrypted = await crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv: b64ToBytes(record.iv) },
+        key,
+        b64ToBytes(record.ciphertext)
+      );
+
+      return new TextDecoder().decode(decrypted);
+    }
+
+    // ── Reveal ────────────────────────────────────────────────────────────────
+    const revealBtn = document.getElementById('revealBtn');
+    const codeInput  = document.getElementById('codeInput');
+    const resultBox  = document.getElementById('resultBox');
+    const errorMsg   = document.getElementById('errorMsg');
+
+    async function doReveal(name, code) {
+      resultBox.classList.add('hidden');
+      errorMsg.classList.add('hidden');
+
+      if (!name) { errorMsg.textContent = 'Please select your name.'; errorMsg.classList.remove('hidden'); return; }
+      if (!code) { errorMsg.textContent = 'Please enter your code.';  errorMsg.classList.remove('hidden'); return; }
+
+      revealBtn.disabled    = true;
+      revealBtn.textContent = '...';
+
+      try {
+        const giftee = await decryptGiftee(name, code);
+        resultBox.innerHTML = `
+          <div class="result-box">
+            <p class="result-label">You got&hellip;</p>
+            <p class="result-name">${giftee}</p>
+            <p class="result-deck">🎁 &nbsp; 🎄</p>
+          </div>`;
+        resultBox.classList.remove('hidden');
+      } catch {
+        errorMsg.textContent = 'Wrong code — try again!';
+        errorMsg.classList.remove('hidden');
+      }
+
+      revealBtn.disabled    = false;
+      revealBtn.textContent = 'Reveal';
+    }
+
+    revealBtn.addEventListener('click', () => doReveal(nameSelect.value, codeInput.value));
+    codeInput.addEventListener('keydown', e => { if (e.key === 'Enter') doReveal(nameSelect.value, codeInput.value); });
+
+    // Auto-reveal from URL params (?n=Name&c=Code)
+    const params    = new URLSearchParams(window.location.search);
+    const paramName = params.get('n');
+    const paramCode = params.get('c');
+    if (paramName && paramCode) {
+      nameSelect.value = paramName;
+      codeInput.value  = paramCode;
+      doReveal(paramName, paramCode);
+    }
+
+    // ── Fun Facts ─────────────────────────────────────────────────────────────
+    const facts = [
+      `Shuffle 8 names randomly and hand them out. There's about a <em>1-in-3</em> chance nobody gets their own name back. Wild part: that's true whether you have 8 guests or 8,000. The answer locks in at almost exactly <em>1-in-2.718</em> — a number called <em>e</em> that shows up in math the same way &pi; does. The universe just decided that was the answer.`,
+
+      `"No giving to your partner" sounds like one small rule. It cuts your valid options by <em>68%</em> — from 14,833 down to 4,752. Turns out love is a very expensive constraint.`,
+
+      `Blocking last year's pairs wipes out <em>74%</em> of what's left after the couples rule. Just 8 assignments from one year ago, and they eliminate nearly three-quarters of your remaining options.`,
+
+      `Of 40,320 ways to assign 8 people, only <em>1,257</em> survive all three rules. Draw names from a hat randomly and you'd get a valid result about once every 32 tries — the same odds as flipping a coin 5 times and getting heads every single time. The algorithm automatically skips the other 31.`,
+
+      `The "nobody gets themselves" probability converges shockingly quickly. By 6 people it's already within rounding distance of the final answer. At 8 people, you're <em>0.0003%</em> away from what you'd get with infinite guests. The universe doesn't need a big group to make up its mind.`,
+    ];
+
+    let currentFact = 0;
+    const factText    = document.getElementById('factText');
+    const factCounter = document.getElementById('factCounter');
+    const nextFactBtn = document.getElementById('nextFact');
+
+    function showFact(i) {
+      factText.innerHTML    = facts[i];
+      factCounter.textContent = `${i + 1} / ${facts.length}`;
+    }
+
+    showFact(0);
+    nextFactBtn.addEventListener('click', () => { currentFact = (currentFact + 1) % facts.length; showFact(currentFact); });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,10 @@
+# Private data — never commit these
+secretsanta/codes.json
+secretsanta/records.json
+secretsanta/PRIVATE_assignment_do_not_view.json
+
+# macOS
+.DS_Store
+
+# Firebase cache
+.firebase/

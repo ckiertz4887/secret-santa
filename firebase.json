@@ -1,0 +1,14 @@
+{
+  "hosting": {
+    "public": "secretsanta",
+    "ignore": [
+      "generate.py",
+      "codes.json",
+      "records.json",
+      "PRIVATE_assignment_do_not_view.json"
+    ],
+    "rewrites": [
+      { "source": "**", "destination": "/index.html" }
+    ]
+  }
+}
