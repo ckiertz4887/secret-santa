@@ -527,12 +527,19 @@
     // Embedded by generate.py — run it to populate this
     const RECORDS = [{"name": "Alice", "salt": "yJekVVEaU4D0na/c9SlSuA==", "iv": "R+5JxVqcAVPafO1n", "ciphertext": "EY+V51mowXtovgrhnmzB1zA991s="}, {"name": "Bob", "salt": "inOSOXDRp5TBI+YK9sbiTw==", "iv": "j7ESZui8PRhNgtDt", "ciphertext": "YEJWgOj+51qbz6yZD7558PHEwA=="}, {"name": "Carol", "salt": "K95z/F52Y6F+aJrkKRjwOQ==", "iv": "Wc37N8WzNWKXtOjl", "ciphertext": "Nd45vwhvSs0KHhNnHKgiuWGO+x8y"}, {"name": "Dave", "salt": "Zmq8i5W33ux/RV7h6EN+1g==", "iv": "dyZs/c+IuS46QAng", "ciphertext": "Doh71vudjxBszdeMrAG8eJnSOL0="}, {"name": "Eve", "salt": "agCBr1kazOgRzBMsIninkw==", "iv": "p5bW4XVOlF1b/Cak", "ciphertext": "Z0yqGJ2sDt3z7WiH04aDgElCHf4E"}, {"name": "Frank", "salt": "6C73WDyELmWetfZsjDtX6Q==", "iv": "fGXxpTsJhXStXkO8", "ciphertext": "DFCP1w1VG4lKK8LRSz7lJ1Aq8g=="}, {"name": "Grace", "salt": "9jCBqsp+HXzfo50pMGJ3kw==", "iv": "D6lUXdn2n6K3WMLc", "ciphertext": "fB5w4uZbDKp8TAjjtMNuWBV46CfZ"}, {"name": "Hank", "salt": "bxGrDZ2UzziK1YyV4gsziw==", "iv": "GK1cqAfd2jOikoC1", "ciphertext": "R1jE75GQ6Hn57KKpAAwd/PwdaO+L"}]; // populated by generate.py — run it to embed your group's encrypted data
 
+    const DEMO_CODES = {"Alice":"14NKYPZY","Bob":"A5KKE6H1","Carol":"ANBBDROC","Dave":"M0RXQJMY","Eve":"4JBRA9SY","Frank":"HTMT1LM0","Grace":"PT8IO6N9","Hank":"SLM8XXXU"};
+
     // ── Populate name dropdown from records ───────────────────────────────────
     const nameSelect = document.getElementById('nameSelect');
     RECORDS.forEach(r => {
       const opt = document.createElement('option');
       opt.value = opt.textContent = r.name;
       nameSelect.appendChild(opt);
+    });
+
+    nameSelect.addEventListener('change', () => {
+      const code = DEMO_CODES[nameSelect.value];
+      if (code) codeInput.value = code;
     });
 
     // ── Lights ────────────────────────────────────────────────────────────────
